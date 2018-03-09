@@ -1,6 +1,9 @@
 package hellofs
 
 import (
+	"flag"
+	"log"
+
 	"github.com/hanwen/go-fuse/fuse"
 	"github.com/hanwen/go-fuse/fuse/nodefs"
 	"github.com/hanwen/go-fuse/fuse/pathfs"
@@ -35,4 +38,14 @@ func (fs *hello) Open(name string, flags uint32, cont *fuse.Context) (file nodef
 		return nil, fuse.ENOENT
 	}
 	return nodefs.NewDataFile([]byte("hello world")), fuse.OK
+}
+
+//Function FS is used to create a file System
+func FS() *fuse.Server {
+	nfs := pathfs.NewPathNodeFs(&hello{FileSystem: pathfs.NewDefaultFileSystem()}, nil)
+	server, _, err := nodefs.MountRoot(flag.Arg(0), nfs.Root(), nil)
+	if err != nil {
+		log.Fatalf("ERROR MOUNTING %v", err)
+	}
+	return server
 }
